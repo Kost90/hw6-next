@@ -8,8 +8,6 @@ const Users = async () => {
     cache: 'no-cache'
   });
 
-  console.log({ users })
-
   return (
     <>
       <Typography variant="h4" gutterBottom>

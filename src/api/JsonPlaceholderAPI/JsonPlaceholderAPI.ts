@@ -6,6 +6,7 @@ export interface FetchArg<Updates = Record<string, unknown>> extends FetchArgs {
   signal?: AbortSignal
   userId?: number
   updates?: Updates
+  id?:number
 }
 
 export interface Photo {
@@ -46,6 +47,21 @@ export interface Company {
   bs: string
 }
 
+export interface Posts {
+  userId: number
+  id: number
+  title: string
+  body: string
+}
+
+export interface Comments {
+  postId: number
+  id: number
+  name: string
+  email: string
+  body: string
+}
+
 class JsonPlaceholderAPI extends API {
   async getPhotos({ signal, ...rest }: FetchArg) {
     const response = await this.fetch<Photo[]>({ path: 'photos', signal })
@@ -61,8 +77,26 @@ class JsonPlaceholderAPI extends API {
     return await this.fetch<User>({ path: `users/${userId}`, signal, ...rest })
   }
 
+  async getPosts({signal} : FetchArg){
+    const response = await this.fetch<Posts[]>({path: 'posts', signal})
+    return response.slice(0,20)
+  }
+
+  async getPost({signal, id}:FetchArg){
+    return await this.fetch<Posts>({path:`posts/${id}`, signal})
+  }
+
+  async getComments({signal}:FetchArg){
+    const response = await this.fetch<Comments[]>({path:'comments', signal})
+    return response.slice(0,20)
+  }
+
   async deleteUser({ signal, userId, ...rest }: FetchArg) {
     return await this.fetch({ path: `users/${userId}`, signal, method: 'DELETE', ...rest })
+  }
+
+  async deletePost({ signal, id } : FetchArg) {
+    return await this.fetch({ path: `posts/${id}`, signal, method: 'DELETE' })
   }
 
   async updateUser({ signal, userId, updates, ...rest }: FetchArg) {

@@ -1,6 +1,6 @@
 'use client'
-
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback, FormEventHandler } from 'react';
 import { Box, Button, Card, CardContent, FormControl, InputLabel, OutlinedInput, Typography } from '@mui/material'
 import JsonPlaceholderAPI, { User } from "@/api/JsonPlaceholderAPI/JsonPlaceholderAPI";
 
@@ -11,7 +11,24 @@ interface EditUserDetailsProps {
 }
 
 const EditUser = ({params: { userId }}: EditUserDetailsProps) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null)
+
+
+  // куда лучше вынести эту функцию и как бы ты это сделал ? заранее спасибо 
+  const handleSubmit = useCallback<FormEventHandler<HTMLFormElement>>(
+    async (e) => {
+      e.preventDefault()
+      const controller = new AbortController()
+      const formData = new FormData(e.currentTarget)
+      const updates = Object.fromEntries(formData.entries())
+    
+      await JsonPlaceholderAPI.updateUser({ signal: controller.signal, userId: Number(userId), updates });
+      router.replace('/users', { scroll: true })
+    },
+    [userId]
+  );
+
 
   useEffect(() => {
     const controller = new AbortController()
@@ -37,7 +54,6 @@ const EditUser = ({params: { userId }}: EditUserDetailsProps) => {
     return null
   }
 
-
   return (
     <>
       <Typography variant="h4" gutterBottom>
@@ -45,7 +61,7 @@ const EditUser = ({params: { userId }}: EditUserDetailsProps) => {
       </Typography>
       <Card>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <Box mb={2}>
               <FormControl fullWidth>
                 <InputLabel htmlFor="name">Name</InputLabel>
